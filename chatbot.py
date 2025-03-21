@@ -8,6 +8,18 @@ import os
 db_path = os.path.abspath("faq.db")
 st.write("📂 사용 중인 DB 경로:", db_path)  # ✅ 챗봇 화면에서 DB 경로 확인!
 
+# 🌟 DB에서 질문 목록 가져오기
+def get_questions():
+    conn = sqlite3.connect("faq.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT keyword FROM faq")
+    questions = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    return questions
+
+# ✅ 챗봇에서 불러온 질문 목록 확인
+questions = get_questions()
+st.write("📂 챗봇 페이지에서 불러온 질문 목록:", questions)  # ✅ 이거 확인하기!
 
 def convert_urls_to_links(text):
     url_pattern = r"(https?://\S+)"
