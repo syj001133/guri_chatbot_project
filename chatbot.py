@@ -4,6 +4,13 @@ from rapidfuzz import process  # 문자열 유사도 비교 라이브러리
 import re
 import os
 
+# 🌟 Streamlit 페이지 설정
+st.set_page_config(
+    page_title="구리시청 내부 민원 챗봇",
+    page_icon="🤖",
+    layout="centered"
+)
+
 # ✅ DB 경로 출력하기
 db_path = os.path.abspath("faq.db")
 st.write("📂 사용 중인 DB 경로:", db_path)  # ✅ 챗봇 화면에서 DB 경로 확인!
@@ -25,12 +32,7 @@ def convert_urls_to_links(text):
     url_pattern = r"(https?://\S+)"
     return re.sub(url_pattern, r'[\1](\1)', text)  # 마크다운 링크로 변환
 
-# 🌟 Streamlit 페이지 설정
-st.set_page_config(
-    page_title="구리시청 내부 민원 챗봇",
-    page_icon="🤖",
-    layout="centered"
-)
+
 
 # 🌟 DB 연결 함수
 def connect_db():
