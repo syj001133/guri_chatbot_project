@@ -1,6 +1,6 @@
 import streamlit as st
 import sqlite3
-from fuzzywuzzy import process  # 문자열 유사도 비교 라이브러리
+from rapidfuzz import process  # 문자열 유사도 비교 라이브러리
 import re
 
 def convert_urls_to_links(text):
@@ -66,22 +66,6 @@ def add_faq_to_db(keyword, response):
     conn.close()
     return "✅ 질문과 답변이 추가되었습니다!"
 
-# 🌟 기존 질문의 답변을 수정하는 함수
-def update_faq_in_db(keyword, new_response):
-    conn = connect_db()
-    cursor = conn.cursor()
-    
-    cursor.execute("SELECT * FROM faq WHERE keyword = ?", (keyword,))
-    existing = cursor.fetchone()
-    
-    if not existing:
-        conn.close()
-        return "❌ 존재하지 않는 질문입니다!"
-    
-    cursor.execute("UPDATE faq SET response = ? WHERE keyword = ?", (new_response, keyword))
-    conn.commit()
-    conn.close()
-    return "✅ 답변이 성공적으로 수정되었습니다!"
 
 # 🌟 스타일 추가
 st.markdown("""
@@ -135,27 +119,3 @@ if st.sidebar.button("추가하기"):
     else:
         st.sidebar.error("❌ 질문과 답변을 모두 입력해주세요!")
 
-# 🌟 기존 질문 수정 기능 ✅
-st.sidebar.subheader("✏️ 기존 질문 수정")
-existing_keywords = []
-conn = connect_db()
-cursor = conn.cursor()
-cursor.execute("SELECT keyword FROM faq")
-existing_keywords = [row[0] for row in cursor.fetchall()]
-conn.close()
-
-selected_keyword = st.sidebar.selectbox("수정할 질문 선택", ["선택하세요"] + existing_keywords)
-
-if selected_keyword != "선택하세요":
-    conn = connect_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT response FROM faq WHERE keyword = ?", (selected_keyword,))
-    existing_response = cursor.fetchone()[0]
-    conn.close()
-
-    new_response_edit = st.sidebar.text_area("새로운 답변 입력", existing_response)
-
-    if st.sidebar.button("수정하기"):
-        if new_response_edit:
-            result = update_faq_in_db(selected_keyword, new_response_edit)
-            st.sidebar.success(result)
