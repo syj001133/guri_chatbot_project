@@ -46,7 +46,8 @@ def convert_urls_to_links(text):
 
 # 🌟 DB 연결 함수
 def connect_db():
-    return sqlite3.connect("faq.db")
+    db_path = r"C:\Users\user\Desktop\챗봇 프로젝트\faq.db"  # ✅ DB 경로 강제 지정!
+    return sqlite3.connect(db_path, check_same_thread=False)
 
 # 🌟 DB에서 질문에 대한 답변 가져오는 함수 (유사 질문도 포함!)
 def get_response_from_db(prompt):
