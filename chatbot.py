@@ -24,6 +24,16 @@ def get_questions():
     conn.close()
     return questions
 
+conn = sqlite3.connect("faq.db")
+cursor = conn.cursor()
+
+# 🔍 DB에 존재하는 테이블 목록 확인
+cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+tables = cursor.fetchall()
+conn.close()
+
+print("📂 현재 DB에 존재하는 테이블 목록:", tables)
+
 # ✅ 챗봇에서 불러온 질문 목록 확인
 questions = get_questions()
 st.write("📂 챗봇 페이지에서 불러온 질문 목록:", questions)  # ✅ 이거 확인하기!
@@ -36,7 +46,7 @@ def convert_urls_to_links(text):
 
 # 🌟 DB 연결 함수
 def connect_db():
-    return sqlite3.connect(r"C:\Users\user\Desktop\챗봇 프로젝트\faq.db", check_same_thread=False)
+    return sqlite3.connect("faq.db")
 
 # 🌟 DB에서 질문에 대한 답변 가져오는 함수 (유사 질문도 포함!)
 def get_response_from_db(prompt):
