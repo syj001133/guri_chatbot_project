@@ -80,7 +80,7 @@ def add_faq_to_db(keyword, response):
         return "⚠️ 이미 존재하는 질문입니다!"
     
     cursor.execute("INSERT INTO faq (keyword, response) VALUES (?, ?)", (keyword, response))
-    conn.commit()
+    conn.commit()  # ✅ 반드시 있어야 함!
     conn.close()
     return "✅ 질문과 답변이 추가되었습니다!"
 
