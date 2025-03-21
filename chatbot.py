@@ -51,14 +51,13 @@ if data:
 else:
     st.write("📂 현재 DB에 저장된 데이터가 없습니다.")
 
-    def get_questions():
-    conn = connect_db()
+def get_questions():
+    conn = connect_db()  # ✅ 올바른 들여쓰기
     cursor = conn.cursor()
     cursor.execute("SELECT keyword FROM faq")
     questions = [row[0] for row in cursor.fetchall()]
     conn.close()
-    return questions
-
+    return questions  # ✅ 들여쓰기 문제 해결!
 
 st.write("📂 현재 DB에 저장된 데이터:", data)  # ✅ 추가한 질문이 보이면 정상!
 
