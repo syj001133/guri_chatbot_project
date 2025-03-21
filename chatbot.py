@@ -35,19 +35,23 @@ def get_response_from_db(prompt):
         conn.close()
         return response[0]  # 정확한 키워드가 있으면 바로 반환
     
-    # 🌟 유사한 키워드 찾기
-    best_match, score = process.extractOne(prompt, keywords)
-    
-    # 유사 키워드가 80% 이상 일치하면 해당 답변까지 함께 출력
-    if score > 80:
-        cursor.execute("SELECT response FROM faq WHERE keyword = ?", (best_match,))
-        suggested_response = cursor.fetchone()
+    #  유사한 키워드 찾기
+    try:
+        best_match, score = process.extractOne(prompt, keywords)
+
+        # 유사 키워드가 80% 이상 일치하면 해당 답변까지 함께 출력
+        if score > 80:
+            cursor.execute("SELECT response FROM faq WHERE keyword = ?", (best_match,))
+            suggested_response = cursor.fetchone()
+            conn.close()
+            if suggested_response:
+                return f"⚠️ 정확한 답변을 찾을 수 없어요.\n대신 '{best_match}' 관련 정보를 확인해보세요!\n\n **{best_match}에 대한 답변:**\n{suggested_response[0]}"
+
         conn.close()
-        if suggested_response:
-            return f"⚠️ 정확한 답변을 찾을 수 없어요.\n대신 '{best_match}' 관련 정보를 확인해보세요!\n\n🔍 **{best_match}에 대한 답변:**\n{suggested_response[0]}"
-    
-    conn.close()
-    return "⚠️ 죄송해요! 해당 질문에 대한 답변을 찾을 수 없어요. 😥"
+        return "⚠️ 죄송해요! 해당 질문에 대한 답변을 찾을 수 없어요. "
+    except ValueError:
+        conn.close()
+        return "유사한 답변을 찾을 수 없습니다."
 
 # 🌟 새로운 질문 & 답변을 DB에 추가하는 함수
 def add_faq_to_db(keyword, response):
