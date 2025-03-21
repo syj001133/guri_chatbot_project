@@ -32,7 +32,7 @@ cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
 tables = cursor.fetchall()
 conn.close()
 
-print("📂 현재 DB에 존재하는 테이블 목록:", tables)
+st.write("📂 현재 DB에 존재하는 테이블 목록:", tables)
 
 # ✅ 챗봇에서 불러온 질문 목록 확인
 questions = get_questions()
