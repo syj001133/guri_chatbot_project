@@ -27,12 +27,12 @@ def get_questions():
 conn = sqlite3.connect("faq.db")
 cursor = conn.cursor()
 
-# 🔍 DB에 존재하는 테이블 목록 확인
-cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-tables = cursor.fetchall()
+# 🔍 현재 DB에 저장된 데이터 확인
+cursor.execute("SELECT * FROM faq")  
+data = cursor.fetchall()
 conn.close()
 
-st.write("📂 현재 DB에 존재하는 테이블 목록:", tables)
+st.write("📂 현재 DB에 저장된 데이터:", data)  # ✅ 추가한 질문이 보이면 정상!
 
 # ✅ 챗봇에서 불러온 질문 목록 확인
 questions = get_questions()
