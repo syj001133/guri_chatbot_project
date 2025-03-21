@@ -2,6 +2,12 @@ import streamlit as st
 import sqlite3
 from rapidfuzz import process  # 문자열 유사도 비교 라이브러리
 import re
+import os
+
+# ✅ DB 경로 출력하기
+db_path = os.path.abspath("faq.db")
+st.write("📂 사용 중인 DB 경로:", db_path)  # ✅ 챗봇 화면에서 DB 경로 확인!
+
 
 def convert_urls_to_links(text):
     url_pattern = r"(https?://\S+)"
