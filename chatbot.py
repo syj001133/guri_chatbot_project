@@ -23,7 +23,7 @@ def get_response_from_db(prompt):
     conn = connect_db()
     cursor = conn.cursor()
 
-    # ✅ 모든 키워드 가져오기 (먼저 실행해야 함!)
+    # ✅ 모든 키워드 가져오기
     cursor.execute("SELECT keyword FROM faq")
     keywords = [row[0] for row in cursor.fetchall()]
 
@@ -38,20 +38,31 @@ def get_response_from_db(prompt):
         conn.close()
         return response[0]  # 정확한 키워드가 있으면 바로 반환
 
-    # ✅ 유사한 키워드 찾기
-    if keywords:  # 🔴 DB에 키워드가 하나도 없을 경우 대비
-        matches = process.extract(prompt, keywords, limit=3)  # 최대 3개의 유사 키워드 반환
+    # ✅ 유사한 키워드 5개 찾기
+    if keywords:
+        matches = process.extract(prompt, keywords, limit=5)  # 🔥 최대 5개의 유사 키워드 반환
 
         # 🔍 유사도 검사 출력 (디버깅용)
-        st.write(f"🔍 유사도 검사: '{prompt}' → {matches}")
+        st.write(f"🔍 유사도 검사 결과: {matches}")
+
+        result_text = "⚠️ 정확한 답변을 찾을 수 없어요.\n\n"
+        found = False  # 하나라도 찾았는지 확인
 
         for best_match, score, _ in matches:
-            if score > 75:  # 유사도가 75 이상이면 해당 답변 반환
+            if score > 75:  # 🔥 유사도가 75% 이상인 질문만 출력
                 cursor.execute("SELECT response FROM faq WHERE keyword = ?", (best_match,))
                 suggested_response = cursor.fetchone()
-                conn.close()
+                
                 if suggested_response:
-                    return f"⚠️ 정확한 답변을 찾을 수 없어요.\n대신 '{best_match}' 관련 정보를 확인해보세요!\n\n **{best_match}에 대한 답변:**\n{suggested_response[0]}"
+                    result_text += f"**{best_match}에 대한 답변:**\n{suggested_response[0]}\n\n"
+                    found = True
+
+        conn.close()
+
+        if found:
+            return result_text
+        else:
+            return "⚠️ 죄송해요! 해당 질문에 대한 답변을 찾을 수 없어요."
 
     conn.close()
     return "⚠️ 죄송해요! 해당 질문에 대한 답변을 찾을 수 없어요."
