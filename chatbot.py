@@ -4,6 +4,9 @@ from rapidfuzz import process  # 문자열 유사도 비교 라이브러리
 import re
 import os
 
+# ✅ DB 경로 강제 지정
+DB_PATH = r"C:\Users\user\Desktop\챗봇 프로젝트\faq.db"
+
 # 🌟 Streamlit 페이지 설정
 st.set_page_config(
     page_title="구리시청 내부 민원 챗봇",
@@ -11,26 +14,38 @@ st.set_page_config(
     layout="centered"
 )
 
-# ✅ DB 경로 출력하기
-db_path = os.path.abspath("faq.db")
-st.write("📂 사용 중인 DB 경로:", db_path)  # ✅ 챗봇 화면에서 DB 경로 확인!
+# ✅ 현재 사용 중인 DB 경로 출력
+st.write("📂 사용 중인 DB 경로:", DB_PATH)
+
+# 🌟 DB 연결 함수 (경로 강제 지정)
+def connect_db():
+    return sqlite3.connect(DB_PATH, check_same_thread=False)
 
 # 🌟 DB에서 질문 목록 가져오기
 def get_questions():
-    conn = sqlite3.connect("faq.db")
+    conn = connect_db()
     cursor = conn.cursor()
     cursor.execute("SELECT keyword FROM faq")
     questions = [row[0] for row in cursor.fetchall()]
     conn.close()
     return questions
 
-conn = sqlite3.connect("faq.db")
-cursor = conn.cursor()
+# ✅ `faq` 테이블이 존재하는지 확인 후 없으면 생성
+def initialize_db():
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS faq (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            keyword TEXT UNIQUE,
+            response TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
 
-# 🔍 현재 DB에 저장된 데이터 확인
-cursor.execute("SELECT * FROM faq")  
-data = cursor.fetchall()
-conn.close()
+# 🔥 `faq.db`가 올바르게 설정되었는지 확인하고 테이블 초기화
+initialize_db()
 
 st.write("📂 현재 DB에 저장된 데이터:", data)  # ✅ 추가한 질문이 보이면 정상!
 
