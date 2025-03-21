@@ -18,7 +18,7 @@ st.set_page_config(
 def connect_db():
     return sqlite3.connect("faq.db")
 
-# 🌟 DB에서 질문에 대한 답변 가져오는 함수 (유사 질문 답변까지 출력)
+# 🌟 DB에서 질문에 대한 답변 가져오는 함수 (유사 질문도 포함!)
 def get_response_from_db(prompt):
     conn = connect_db()
     cursor = conn.cursor()
@@ -38,17 +38,19 @@ def get_response_from_db(prompt):
     #  유사한 키워드 찾기
     try:
         best_match, score = process.extractOne(prompt, keywords)
-
-        # 유사 키워드가 80% 이상 일치하면 해당 답변까지 함께 출력
-        if score > 80:
-            cursor.execute("SELECT response FROM faq WHERE keyword = ?", (best_match,))
-            suggested_response = cursor.fetchone()
-            conn.close()
-            if suggested_response:
-                return f"⚠️ 정확한 답변을 찾을 수 없어요.\n대신 '{best_match}' 관련 정보를 확인해보세요!\n\n **{best_match}에 대한 답변:**\n{suggested_response[0]}"
+        
+        # 유사 키워드가 75% 이상 일치하거나, 키워드 일부가 포함되면 해당 답변을 제공
+        for keyword in keywords:
+            if keyword in prompt or score > 75:
+                cursor.execute("SELECT response FROM faq WHERE keyword = ?", (best_match,))
+                suggested_response = cursor.fetchone()
+                conn.close()
+                if suggested_response:
+                    return f"⚠️ 정확한 답변을 찾을 수 없어요.\n대신 '{best_match}' 관련 정보를 확인해보세요!\n\n **{best_match}에 대한 답변:**\n{suggested_response[0]}"
 
         conn.close()
         return "⚠️ 죄송해요! 해당 질문에 대한 답변을 찾을 수 없어요. "
+    
     except ValueError:
         conn.close()
         return "유사한 답변을 찾을 수 없습니다."
@@ -69,7 +71,6 @@ def add_faq_to_db(keyword, response):
     conn.commit()
     conn.close()
     return "✅ 질문과 답변이 추가되었습니다!"
-
 
 # 🌟 스타일 추가
 st.markdown("""
@@ -108,10 +109,9 @@ if user_input:
 
     st.markdown(f"🤖 {response}", unsafe_allow_html=False)  # ✅ 마크다운으로 URL 변환 적용
 
-# 🌟 사이드바 (FAQ 추가 및 수정 기능)
+# 🌟 사이드바 (FAQ 추가 기능)
 st.sidebar.title("🔧 FAQ 관리")
 
-# 🌟 새로운 질문 추가 기능 ✅
 st.sidebar.subheader("➕ 새로운 질문 추가")
 new_keyword = st.sidebar.text_input("새로운 질문 (키워드)")
 new_response = st.sidebar.text_area("답변 내용")
@@ -122,4 +122,3 @@ if st.sidebar.button("추가하기"):
         st.sidebar.success(result)
     else:
         st.sidebar.error("❌ 질문과 답변을 모두 입력해주세요!")
-
