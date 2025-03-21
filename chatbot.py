@@ -21,15 +21,6 @@ st.write("📂 사용 중인 DB 경로:", DB_PATH)
 def connect_db():
     return sqlite3.connect(DB_PATH, check_same_thread=False)
 
-# 🌟 DB에서 질문 목록 가져오기
-def get_questions():
-    conn = connect_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT keyword FROM faq")
-    questions = [row[0] for row in cursor.fetchall()]
-    conn.close()
-    return questions
-
 # ✅ `faq` 테이블이 존재하는지 확인 후 없으면 생성
 def initialize_db():
     conn = connect_db()
@@ -44,8 +35,22 @@ def initialize_db():
     conn.commit()
     conn.close()
 
-# 🔥 `faq.db`가 올바르게 설정되었는지 확인하고 테이블 초기화
+    # 🔥 `faq.db`가 올바르게 설정되었는지 확인하고 테이블 초기화
 initialize_db()
+
+
+# ✅ 현재 DB에 저장된 데이터 가져오기
+conn = connect_db()
+cursor = conn.cursor()
+cursor.execute("SELECT * FROM faq")  
+data = cursor.fetchall()  # 🔥 `data` 변수를 여기에 정의!
+conn.close()
+
+if data:
+    st.write("📂 현재 DB에 저장된 데이터:", data)
+else:
+    st.write("📂 현재 DB에 저장된 데이터가 없습니다.")
+
 
 st.write("📂 현재 DB에 저장된 데이터:", data)  # ✅ 추가한 질문이 보이면 정상!
 
